@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒流时光的转角</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f5f2ed;
+            --bg-secondary: #ede8e0;
+            --bg-card: rgba(255, 253, 250, 0.85);
+            --text-primary: #4a4540;
+            --text-secondary: #8a8279;
+            --text-muted: #b5ada3;
+            --accent: #a89f91;
+            --accent-light: #c4bbb0;
+            --border: rgba(168, 159, 145, 0.25);
+            --shadow: rgba(74, 69, 64, 0.06);
+            --texture-opacity: 0.03;
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #2a2825;
+            --bg-secondary: #35322e;
+            --bg-card: rgba(45, 43, 40, 0.9);
+            --text-primary: #d8d2c8;
+            --text-secondary: #a8a095;
+            --text-muted: #7a746c;
+            --accent: #b8ae9e;
+            --accent-light: #9a9184;
+            --border: rgba(184, 174, 158, 0.15);
+            --shadow: rgba(0, 0, 0, 0.2);
+            --texture-opacity: 0.02;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            transition: var(--transition);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 细腻纹理背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: var(--texture-opacity);
+            pointer-events: none;
+            z-index: 0;
+            transition: var(--transition);
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 0 8%;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(245, 242, 237, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        [data-theme="dark"] nav { background: rgba(42, 40, 37, 0.75); }
+
+        .nav-brand {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: 0.15em;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .nav-brand:hover { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+        .nav-links a {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            text-decoration: none;
+            letter-spacing: 0.08em;
+            position: relative;
+            padding: 0.3rem 0;
+            transition: var(--transition);
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 0; height: 1px;
+            background: var(--accent);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* 主题切换 */
+        .theme-toggle {
+            width: 44px; height: 24px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 1.5rem;
+            outline: none;
+        }
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(20px);
+            background: var(--accent-light);
+        }
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            transition: var(--transition);
+        }
+        .theme-toggle .icon-sun { left: 5px; opacity: 1; }
+        .theme-toggle .icon-moon { right: 5px; opacity: 0.3; }
+        [data-theme="dark"] .theme-toggle .icon-sun { opacity: 0.3; }
+        [data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 8% 80px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-decoration {
+            width: 1px; height: 60px;
+            background: linear-gradient(to bottom, transparent, var(--accent-light), transparent);
+            margin-bottom: 3rem;
+            opacity: 0.6;
+        }
+        .hero h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-weight: 300;
+            color: var(--text-primary);
+            line-height: 2.2;
+            max-width: 680px;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1.2s ease-out 0.3s forwards;
+        }
+        .hero-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-top: 2.5rem;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease-out 0.8s forwards;
+        }
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1.5s forwards;
+        }
+        .scroll-hint span {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+        }
+        .scroll-hint .line {
+            width: 1px; height: 40px;
+            background: linear-gradient(to bottom, var(--accent-light), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        /* 文章列表 */
+        .articles {
+            padding: 80px 8%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.3em;
+            text-align: center;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+        }
+        .article-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2.5rem 3rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .article-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px; height: 0;
+            background: linear-gradient(to bottom, var(--accent), var(--accent-light));
+            transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .article-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px var(--shadow);
+        }
+        .article-item:hover::before { height: 100%; }
+        .article-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, box-shadow 0.5s ease, background 0.5s ease;
+        }
+        .article-date {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.8rem;
+        }
+        .article-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            transition: var(--transition);
+        }
+        .article-item:hover .article-title { color: var(--accent); }
+        .article-excerpt {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            line-height: 1.9;
+            margin-bottom: 1.5rem;
+        }
+
+        /* 展开的全文内容 */
+        .article-full {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            line-height: 2;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.6s ease-out,
+                        margin 0.5s ease;
+            margin-top: 0;
+        }
+        .article-full.expanded {
+            max-height: 2000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+        .article-full p {
+            margin-bottom: 1.2rem;
+            text-indent: 2em;
+        }
+        .article-full p:last-child {
+            margin-bottom: 0;
+        }
+
+        .read-more {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        .read-more::after {
+            content: '→';
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .read-more:hover { color: var(--text-primary); }
+        .read-more:hover::after { transform: translateX(4px); }
+        .read-more.expanded::after {
+            content: '↑';
+            transform: rotate(0deg);
+        }
+        .read-more.expanded:hover::after {
+            transform: translateY(-2px);
+        }
+
+        /* 关于区域 */
+        .about-section {
+            padding: 100px 8% 60px;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        .about-divider {
+            width: 40px;
+            height: 1px;
+            background: var(--accent-light);
+            margin: 0 auto 3rem;
+            opacity: 0.6;
+        }
+        .about-section blockquote {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            line-height: 2.2;
+            letter-spacing: 0.03em;
+            position: relative;
+            padding: 0 1rem;
+        }
+        .about-section blockquote::before,
+        .about-section blockquote::after {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            color: var(--accent-light);
+            opacity: 0.4;
+            line-height: 1;
+            position: absolute;
+        }
+        .about-section blockquote::before {
+            content: '"';
+            top: -0.8rem;
+            left: -0.5rem;
+        }
+        .about-section blockquote::after {
+            content: '"';
+            bottom: -1.5rem;
+            right: -0.5rem;
+        }
+        .about-section .about-author {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-top: 2rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 40px 8% 60px;
+            position: relative;
+            z-index: 1;
+        }
+        footer::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            margin: 0 auto 40px;
+        }
+        footer p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+        }
+
+        /* 回到顶部 */
+        .back-to-top {
+            position: fixed;
+            bottom: 40px; right: 40px;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: var(--transition);
+            z-index: 99;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .back-to-top:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        /* 时间小部件 */
+        .time-widget {
+            position: fixed;
+            bottom: 40px; left: 40px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            z-index: 99;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+        .time-widget:hover { opacity: 1; }
+
+        /* 打字机光标 */
+        .typewriter-cursor {
+            display: inline-block;
+            width: 1px; height: 1.2em;
+            background: var(--accent);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.2); }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* 选中文字 */
+        ::selection {
+            background: var(--accent-light);
+            color: var(--bg-primary);
+        }
+        [data-theme="dark"] ::selection {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            nav { padding: 0 5%; height: 60px; }
+            .nav-links { gap: 1.5rem; }
+            .nav-links a { font-size: 0.8rem; }
+            .theme-toggle { margin-left: 0.8rem; }
+            .hero { padding: 100px 5% 60px; }
+            .hero h1 { font-size: 1rem; line-height: 2; }
+            .articles { padding: 60px 5%; }
+            .article-item { padding: 1.8rem 2rem; }
+            .about-section { padding: 60px 5% 40px; }
+            .about-section blockquote { font-size: 0.9rem; padding: 0 0.5rem; }
+            .about-section blockquote::before,
+            .about-section blockquote::after { font-size: 2rem; }
+            .back-to-top { bottom: 20px; right: 20px; width: 40px; height: 40px; }
+            .time-widget { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" class="nav-brand">倒流时光的转角</a>
+        <div class="nav-links">
+            <a href="#home">首页</a>
+            <a href="#about">关于</a>
+            <a href="#archive">归档</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+                <span class="icon-sun">☀</span>
+                <span class="icon-moon">☾</span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-decoration"></div>
+        <h1 id="heroText"></h1>
+        <p class="hero-subtitle">— 时间的驿站 —</p>
+        <div class="scroll-hint">
+            <span>向下滚动</span>
+            <div class="line"></div>
+        </div>
+    </section>
+
+    <section class="articles" id="archive">
+        <p class="section-title">Recent Writings</p>
+
+        <article class="article-item">
+            <div class="article-date">2026年8月8日</div>
+            <h2 class="article-title">夏末的梧桐与散落的信笺</h2>
+            <p class="article-excerpt">
+                午后的阳光透过梧桐叶的缝隙，在旧书桌上投下斑驳的光影。那封未寄出的信，在抽屉里沉睡了许多个夏天。风从半开的窗户溜进来，翻动着泛黄的纸页，像是要替我把那些说不出口的话，悄悄说给时光听……
+            </p>
+            <button class="read-more" onclick="toggleArticle(this)">阅读全文</button>
+            <div class="article-full">
+                <p>那封信写于三年前的夏末，收信人是一位旧友。我们曾在同一棵梧桐树下读过诗，在雨后的水洼里看过云的影子，在黄昏的站台分享过同一副耳机。后来她去了很远的城市，而我留在了原地。不是不想寄出，只是每次走到邮筒前，总觉得信里的字句还不够好，不够完整，不够配得上那些共同走过的日子。</p>
+                <p>抽屉里还躺着半块橡皮、一张褪色的电影票根、以及一片压干了的银杏叶。它们和这封信一起，构成了我私人博物馆里最珍贵的藏品。有时候我想，或许有些信注定不必寄出，有些告别注定不必说出口。它们安静地躺在时光的角落里，本身就是一种温柔的圆满。</p>
+                <p>窗外的梧桐叶又黄了一轮。我把信纸重新折好，放回抽屉最深处。风铃在檐下轻轻作响，像是某个遥远夏日的回音。</p>
+            </div>
+        </article>
+
+        <article class="article-item">
+            <div class="article-date">2026年7月22日</div>
+            <h2 class="article-title">雨夜煮茶，听瓦上旧事</h2>
+            <p class="article-excerpt">
+                雨从傍晚开始下，起初是零星的几滴，后来便成了连绵的帘幕。我点了一盏暖黄的灯，在厨房里煮一壶老白茶。水汽氤氲中，窗外的雨声像是远方传来的低语，诉说着那些被岁月冲淡却依然温润的往事……
+            </p>
+            <button class="read-more" onclick="toggleArticle(this)">阅读全文</button>
+            <div class="article-full">
+                <p>老白茶是去年冬天从一位茶农手里买的，他说这茶已经陈了七年，最适合在雨天慢慢煮。我向来不懂茶，却喜欢煮茶的过程——看水从平静到沸腾，看茶叶在壶中缓缓舒展，仿佛一场微型的苏醒仪式。厨房里弥漫着淡淡的枣香和药香，让人想起外婆家老房子的味道。</p>
+                <p>雨点敲打着瓦片，发出清脆的声响。这座老房子的瓦是青灰色的，据说已经有四十年的历史。我想象着这四十年间，有多少个这样的雨夜，有多少人在同一盏灯下听过同样的雨声。他们或许也曾为某个人等待，为某段往事叹息，然后在天明之前，把所有的情绪都交给这场雨带走。</p>
+                <p>茶煮好了，汤色橙黄透亮。我捧着杯子坐在窗前，看雨水顺着玻璃蜿蜒而下，像是谁在窗外写下的无字诗。这样的夜晚不适合想太多，只适合让思绪随着茶香和雨声，飘向那些遥远而温柔的地方。</p>
+            </div>
+        </article>
+
+        <article class="article-item">
+            <div class="article-date">2026年6月15日</div>
+            <h2 class="article-title">老巷深处的花香与旧时光</h2>
+            <p class="article-excerpt">
+                那条青石板铺就的老巷，走了无数次，却总能在某个转角遇见新的惊喜。墙角的野蔷薇又开了，淡淡的粉白爬满了斑驳的砖墙。卖花的老妇人坐在门槛上，手里编着花环，抬头冲我笑的时候，眼角的皱纹里盛满了整个夏天的温柔……
+            </p>
+            <button class="read-more" onclick="toggleArticle(this)">阅读全文</button>
+            <div class="article-full">
+                <p>老妇人姓林，在这条巷子里卖花已有二十多年。她说这些花大多是自己种的，巷尾那间带小院的平房就是她的家。每次路过，她总会摘一朵最新鲜的栀子花别在我衣襟上，说年轻人身上应该有花香。我从不好意思白拿，便在她的小摊前买一束满天星或洋桔梗，插在书桌上的玻璃瓶里，能香整整一周。</p>
+                <p>巷子深处有一家旧书店，门面窄得只容一人通过，里面却别有洞天。书架从地面一直延伸到天花板，空气中漂浮着旧纸张特有的气息。店主是个沉默寡言的老先生，总是坐在柜台后面打盹，听到脚步声才缓缓睁开眼睛，用眼神示意你自己找书。我在这里淘到过一本八十年代的《飞鸟集》，扉页上有人用钢笔写着："赠予即将远行的你，愿你在异乡也能看见飞鸟。"</p>
+                <p>夕阳西下时，老巷被镀上一层金边。林婆婆开始收拾花摊，旧书店的灯也亮了起来。我捧着新买的书，衣襟上别着栀子花，慢慢走出巷口。回头望去，那条青石板路在暮色中泛着温润的光，像是一段不愿醒来的旧梦。</p>
+            </div>
+        </article>
+
+        <article class="article-item">
+            <div class="article-date">2026年5月3日</div>
+            <h2 class="article-title">在图书馆的角落，与一本书偶遇</h2>
+            <p class="article-excerpt">
+                那是一本被遗忘在书架最底层的诗集，封面已经褪色，书页边缘微微卷曲。我蹲下身，轻轻拂去上面的微尘，翻开第一页，一行手写的批注映入眼帘："献给所有在深夜独自醒来的灵魂。"那一刻，仿佛有人穿越了时空，轻轻握住了我的手……
+            </p>
+            <button class="read-more" onclick="toggleArticle(this)">阅读全文</button>
+            <div class="article-full">
+                <p>诗集的名字叫《午夜园丁》，作者是一位我从未听说过的诗人。书中的诗大多写于上世纪七十年代，字里行间弥漫着一种安静的孤独——不是悲伤的孤独，而是像深夜花园里的一盏灯，明知无人会来，却依然亮着的那种孤独。</p>
+                <p>我在图书馆的角落里读了一整个下午。阳光从西窗斜射进来，在书页上移动，像是一只慵懒的猫。读到其中一首写雨的诗时，窗外恰好也开始下雨。那种奇妙的巧合让我愣了很久，仿佛这本书一直在等待这个下午，等待这场雨，等待一个愿意蹲下来的人。</p>
+                <p>闭馆时，我把诗集借回了家。借阅卡上显示，上一次有人借走它是在六年前。六年的时光，足够让一个人改变很多，却不足以让一首诗失去它的温度。我在扉页那行批注下面，轻轻写上了今天的日期。或许六年后，也会有另一个人蹲下来，拂去微尘，然后发现，原来孤独也是可以被传递的温柔。</p>
+            </div>
+        </article>
+
+        <article class="article-item">
+            <div class="article-date">2026年4月18日</div>
+            <h2 class="article-title">春日迟暮，樱花落满肩</h2>
+            <p class="article-excerpt">
+                樱花盛开的季节总是短暂得令人心疼。站在那棵百年樱树下，看花瓣如雪般纷纷扬扬，落在肩头，落在发间，也落在心里某个柔软的角落。风起时，满树的花雨像是一场无声的告别，而我只是静静地站着，把这一刻的绚烂，小心地收进记忆的锦囊……
+            </p>
+            <button class="read-more" onclick="toggleArticle(this)">阅读全文</button>
+            <div class="article-full">
+                <p>那棵樱树种在城郊的公园里，据说是一位旅日华侨在百年前亲手栽下的。每年四月，它都会准时盛开，从不辜负任何一个前来赴约的人。我喜欢在傍晚时分去，那时游人渐散，夕阳把粉色的花瓣染成金红色，整棵树像是一团燃烧的云。</p>
+                <p>今年去的时候，树下坐着一位白发老人。她穿着素色的和服，膝上摊着一本相册，正对着满树繁花发呆。我犹豫了一下，还是在她身旁的长椅上坐下。她转过头，用略带口音的汉语对我说："我丈夫生前每年都来。他走了以后，我就替他来。"她的语气平静得像是在讲述一件再平常不过的事，可我却看见她眼角有泪光在夕阳里闪烁。</p>
+                <p>风起时，花瓣纷纷落在她的白发上，落在相册的封面上，也落在我的肩头。她没有去拂，只是轻轻合上相册，说："你看，他派花来看我了。"那一刻，我忽然明白了什么是永恒——不是永远存在，而是即使不在了，依然有人愿意为你赴一场每年的花约。夕阳沉下去的时候，老人起身离去，背影消失在铺满花瓣的小径尽头。我独自站在树下，直到最后一缕光也离开花瓣。</p>
+            </div>
+        </article>
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="about-divider"></div>
+        <blockquote>
+            不过是一个寻常夜晚——作者偶然得知搜狐博客早在2017年便已停运，那些散落于高中、大学时光的个人随笔，也随之荡然无存。旧迹难寻，念旧之人，只得亲手再筑一角，以寄过往。
+        </blockquote>
+        <p class="about-author">— 关于本站 —</p>
+    </section>
+
+    <footer>
+        <p>© 2026 紫墨</p>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+    <div class="time-widget" id="timeWidget"></div>
+
+    <script>
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.setAttribute('data-theme', 'dark');
+        }
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // 打字机效果
+        const heroText = document.getElementById('heroText');
+        const text = '当光逆着年轮行走，这个拐角便成了时间的驿站。你推门时，风铃摇响的，是昨日落下的半句对白。';
+        let index = 0;
+        function typeWriter() {
+            if (index < text.length) {
+                heroText.innerHTML = text.substring(0, index + 1) + '<span class="typewriter-cursor"></span>';
+                index++;
+                setTimeout(typeWriter, 80 + Math.random() * 40);
+            } else {
+                heroText.innerHTML = text + '<span class="typewriter-cursor"></span>';
+                setTimeout(() => {
+                    const cursor = heroText.querySelector('.typewriter-cursor');
+                    if (cursor) cursor.style.display = 'none';
+                }, 3000);
+            }
+        }
+        setTimeout(typeWriter, 800);
+
+        // 文章展开/收起
+        function toggleArticle(btn) {
+            const full = btn.nextElementSibling;
+            const isExpanded = full.classList.contains('expanded');
+
+            if (isExpanded) {
+                full.classList.remove('expanded');
+                btn.classList.remove('expanded');
+                btn.innerHTML = '阅读全文';
+                full.parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                full.classList.add('expanded');
+                btn.classList.add('expanded');
+                btn.innerHTML = '收起全文';
+            }
+        }
+
+        // 回到顶部
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 500);
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 滚动渐入动画
+        const articleItems = document.querySelectorAll('.article-item');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), i * 150);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+        articleItems.forEach(item => observer.observe(item));
+
+        // 左下角实时时间
+        const timeWidget = document.getElementById('timeWidget');
+        function updateTime() {
+            const now = new Date();
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            timeWidget.innerHTML = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 周${weekdays[now.getDay()]} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // 导航栏滚动阴影
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            nav.style.boxShadow = window.scrollY > 100 ? '0 2px 20px var(--shadow)' : 'none';
+        });
+
+        // 平滑滚动锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>
