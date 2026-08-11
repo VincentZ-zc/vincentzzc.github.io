@@ -50,7 +50,6 @@
             overflow-x: hidden;
         }
 
-        /* 细腻纹理背景 */
         body::before {
             content: '';
             position: fixed;
@@ -63,7 +62,6 @@
             transition: var(--transition);
         }
 
-        /* 导航栏 */
         nav {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -120,7 +118,6 @@
         .nav-links a:hover { color: var(--text-primary); }
         .nav-links a:hover::after { width: 100%; }
 
-        /* 主题切换 */
         .theme-toggle {
             width: 44px; height: 24px;
             border-radius: 12px;
@@ -159,7 +156,6 @@
         [data-theme="dark"] .theme-toggle .icon-sun { opacity: 0.3; }
         [data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; }
 
-        /* Hero */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -223,7 +219,6 @@
             animation: scrollPulse 2s ease-in-out infinite;
         }
 
-        /* 文章列表 */
         .articles {
             padding: 80px 6%;
             max-width: 860px;
@@ -298,7 +293,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* 展开的全文内容 */
         .article-full {
             font-family: 'Noto Sans SC', sans-serif;
             font-size: 0.9rem;
@@ -358,7 +352,6 @@
             transform: translateY(-2px);
         }
 
-        /* 关于区域 */
         .about-section {
             padding: 100px 6% 60px;
             max-width: 700px;
@@ -412,7 +405,6 @@
             right: -0.5rem;
         }
 
-        /* 页脚 */
         footer {
             text-align: center;
             padding: 40px 8% 60px;
@@ -434,7 +426,6 @@
             letter-spacing: 0.15em;
         }
 
-        /* 回到顶部 */
         .back-to-top {
             position: fixed;
             bottom: 40px; right: 40px;
@@ -468,7 +459,6 @@
             transform: translateY(-3px);
         }
 
-        /* 时间小部件 */
         .time-widget {
             position: fixed;
             bottom: 40px; left: 40px;
@@ -482,7 +472,6 @@
         }
         .time-widget:hover { opacity: 1; }
 
-        /* 打字机光标 */
         .typewriter-cursor {
             display: inline-block;
             width: 1px; height: 1.2em;
@@ -492,7 +481,6 @@
             animation: blink 1s step-end infinite;
         }
 
-        /* 动画 */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -506,7 +494,6 @@
             50% { opacity: 0; }
         }
 
-        /* 选中文字 */
         ::selection {
             background: var(--accent-light);
             color: var(--bg-primary);
@@ -516,7 +503,6 @@
             color: var(--bg-primary);
         }
 
-        /* 大屏幕优化 */
         @media (min-width: 1400px) {
             .articles {
                 max-width: 960px;
@@ -531,7 +517,6 @@
             }
         }
 
-        /* 响应式 */
         @media (max-width: 768px) {
             nav { padding: 0 5%; height: 60px; }
             .nav-links { gap: 1.5rem; }
@@ -664,7 +649,6 @@
     <div class="time-widget" id="timeWidget"></div>
 
     <script>
-        // 主题切换
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
         const savedTheme = localStorage.getItem('theme');
@@ -679,14 +663,20 @@
             localStorage.setItem('theme', newTheme);
         });
 
-        // 打字机效果
+        // 打字机效果：在"你推门时"前强制换行
         const heroText = document.getElementById('heroText');
-        const text = '当光逆着年轮行走，这个拐角便成了时间的驿站。你推门时，风铃摇响的，是昨日落下的半句对白。';
+        const text = '当光逆着年轮行走，这个拐角便成了时间的驿站。<br>你推门时，风铃摇响的，是昨日落下的半句对白。';
         let index = 0;
         function typeWriter() {
             if (index < text.length) {
-                heroText.innerHTML = text.substring(0, index + 1) + '<span class="typewriter-cursor"></span>';
-                index++;
+                // 遇到 <br> 标签时一次性输出，不做逐字拆分
+                if (text.substring(index, index + 4) === '<br>') {
+                    heroText.innerHTML = text.substring(0, index + 4) + '<span class="typewriter-cursor"></span>';
+                    index += 4;
+                } else {
+                    heroText.innerHTML = text.substring(0, index + 1) + '<span class="typewriter-cursor"></span>';
+                    index++;
+                }
                 setTimeout(typeWriter, 80 + Math.random() * 40);
             } else {
                 heroText.innerHTML = text + '<span class="typewriter-cursor"></span>';
@@ -698,11 +688,9 @@
         }
         setTimeout(typeWriter, 800);
 
-        // 文章展开/收起
         function toggleArticle(btn) {
             const full = btn.nextElementSibling;
             const isExpanded = full.classList.contains('expanded');
-
             if (isExpanded) {
                 full.classList.remove('expanded');
                 btn.classList.remove('expanded');
@@ -715,7 +703,6 @@
             }
         }
 
-        // 回到顶部
         const backToTop = document.getElementById('backToTop');
         window.addEventListener('scroll', () => {
             backToTop.classList.toggle('visible', window.scrollY > 500);
@@ -724,7 +711,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // 滚动渐入动画
         const articleItems = document.querySelectorAll('.article-item');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry, i) => {
@@ -736,7 +722,6 @@
         }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
         articleItems.forEach(item => observer.observe(item));
 
-        // 左下角实时时间
         const timeWidget = document.getElementById('timeWidget');
         function updateTime() {
             const now = new Date();
@@ -746,13 +731,11 @@
         updateTime();
         setInterval(updateTime, 1000);
 
-        // 导航栏滚动阴影
         const nav = document.querySelector('nav');
         window.addEventListener('scroll', () => {
             nav.style.boxShadow = window.scrollY > 100 ? '0 2px 20px var(--shadow)' : 'none';
         });
 
-        // 平滑滚动锚点
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
