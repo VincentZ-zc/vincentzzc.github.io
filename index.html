@@ -225,8 +225,8 @@
 
         /* 文章列表 */
         .articles {
-            padding: 80px 8%;
-            max-width: 800px;
+            padding: 80px 6%;
+            max-width: 860px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -360,7 +360,7 @@
 
         /* 关于区域 */
         .about-section {
-            padding: 100px 8% 60px;
+            padding: 100px 6% 60px;
             max-width: 700px;
             margin: 0 auto;
             position: relative;
@@ -373,6 +373,14 @@
             background: var(--accent-light);
             margin: 0 auto 3rem;
             opacity: 0.6;
+        }
+        .about-section .about-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            letter-spacing: 0.1em;
         }
         .about-section blockquote {
             font-family: 'Noto Serif SC', serif;
@@ -402,14 +410,6 @@
             content: '"';
             bottom: -1.5rem;
             right: -0.5rem;
-        }
-        .about-section .about-author {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 0.85rem;
-            font-style: italic;
-            color: var(--text-muted);
-            margin-top: 2rem;
-            letter-spacing: 0.1em;
         }
 
         /* 页脚 */
@@ -514,6 +514,21 @@
         [data-theme="dark"] ::selection {
             background: var(--accent);
             color: var(--bg-primary);
+        }
+
+        /* 大屏幕优化 */
+        @media (min-width: 1400px) {
+            .articles {
+                max-width: 960px;
+                padding: 80px 5%;
+            }
+            .article-item {
+                padding: 3rem 3.5rem;
+            }
+            .about-section {
+                max-width: 760px;
+                padding: 100px 5% 60px;
+            }
         }
 
         /* 响应式 */
@@ -635,10 +650,10 @@
 
     <section class="about-section" id="about">
         <div class="about-divider"></div>
+        <p class="about-label">— 关于本站 —</p>
         <blockquote>
             不过是一个寻常夜晚——作者偶然得知搜狐博客早在2017年便已停运，那些散落于高中、大学时光的个人随笔，也随之荡然无存。旧迹难寻，念旧之人，只得亲手再筑一角，以寄过往。
         </blockquote>
-        <p class="about-author">— 关于本站 —</p>
     </section>
 
     <footer>
